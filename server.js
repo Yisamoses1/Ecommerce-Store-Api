@@ -1,13 +1,24 @@
 require('dotenv').config()
 const express = require('express');
 const mongoose = require('mongoose');
-const Product = require('./model/product');
-const productRoute = require('./routes/productRoute')
+const productRoute = require('./routes/productRoute');
+const errorMiddleware  = require('./middleware/errorMiddleware');
+
+
 
 const app = express();
-
+//middlware for json
 app.use(express.json());
+// middleware to support XML
 app.use(express.urlencoded({extended: false}))
+//middleware for the route
+app.use('/products', productRoute)
+//
+
+
+
+// middleware for error
+app.use(errorMiddleware);
 
 const MONGO_URL = process.env.MONGO_URL
 
@@ -22,4 +33,3 @@ mongoose.connect(MONGO_URL)
 .catch((err) => {
     console.log(err)
 });
-
