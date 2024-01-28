@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express');
 const mongoose = require('mongoose');
 const productRoute = require('./routes/productRoute');
+const userRoute = require('./routes/userRoute')
 const errorMiddleware  = require('./middleware/errorMiddleware');
 
 
@@ -11,9 +12,10 @@ const app = express();
 app.use(express.json());
 // middleware to support XML
 app.use(express.urlencoded({extended: false}))
-//middleware for the route
+//middleware for the product route
 app.use('/products', productRoute)
-//
+//middleware for the user route
+app.use('/user', userRoute);
 
 
 
