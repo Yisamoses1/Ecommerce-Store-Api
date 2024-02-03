@@ -1,79 +1,104 @@
 const User = require('../model/userModel');
-const asyncHandler = require('express-async-handler');
+const jwt = require('jsonwebtoken')
+
+const handleErrors = (err) => {
+    let errors = { email: '',  password: ''};
+    // Incorrect email 
+    if(err.message === 'incorrect email'){
+        errors.email = 'That email is not registered'
+    }
+    // Incorrect paasword
+    if(err.message === 'incorrect pasword'){
+        errors.password = 'That password is incorrect'
+    }
+
+    //duplicate error code
+    if(err.code === 11000) {
+        errors.email = 'That email is already registered'
+        return errors
+    }
+
+    // validation errors
+
+    if(err.message.includes('User validation failed')) {
+        Object.values(err.errors).forEach(({properties}) => {
+            // the properties in this case is to get the error properties for both the email and password
+            errors[properties.path] = properties.message;
+        });
+    }
+    return errors;
+}
 
 
-// get all users
-const getUsers = asyncHandler( async(req, res) => {
+// three days
+const maxAge = 3*24*60*60
+
+const createToken = (id) => {
+    return jwt.sign({ id }, 'product secret', {
+        expiresIn: maxAge
+        // the header is automatically applied
+    });
+}
+
+
+//
+const signup_get =  async(req, res) => {
     try {
-        const users = await User.find({})
-        res.status(200).json(users)
+        const user = await User.find({})
+        res.status(201).json(user)
     } catch (error) {
-        res.status(500);
-        throw new Error(error.message)
+        throw new Error(err.message)
     }
-});
-// get a single user
-const getUser = asyncHandler( async(req, res) => {
-   try {
-    const {id} = req.params;
-    const user = await User.findById(id);
-    res.status(200).json(user)
-   } catch (error) {
-    res.status(500);
-    throw new Error(error.message)
-   }
-});
-// create a user
-const createUser = asyncHandler( async(req, res) => {
+};
+
+const signup_post = async(req, res) => {
     try {
-        const user = await User.create(req.body);
-        res.status(200).json(user);
+        const {email, password} = req.body;
+        const user = await User.create({email, password});
+        const token = createToken(user._id);
+        res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge*1000 })
+        res.status(201).json({user: user._id })
+    } catch (err) {
+        const errors = handleErrors(err)
+        res.status(400).json({ errors })
+    }
+};
+
+const login_get =  async(req, res) => {
+    try {
+        const user = await User.find({})
+        res.status(201).json(user)
     } catch (error) {
-        res.status(500);
-        throw new Error(error.message)
+        throw new Error(err.message)
     }
-});
-// update a user
-const updateUser = asyncHandler( async(req, res) => {
-   try {
-    const {id} = req.params;
-    const user = await User.findByIdAndUpdate(id);
-    if(!user){
-        res.status(404)
-        throw new Error(`cannot find user with the given id ${id}`)
+};
+
+const login_post =  async(req, res) => {
+    try {
+        const {email, password} = req.body;
+        const user = await User.login(email, password);
+        const token = createToken(user._id);
+        res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge*1000 })    
+      res.status(200).json({user: user._id})
+    } catch (err) {
+        const errors = handleErrors(err)
+        res.status(400).json({errors });
     }
-    const updatedUserUser = await User.findById(id)
-    res.status(200).json(updatedUserUser)
-   } catch (error) {
-    res.status(500);
-    throw new Error(error.message)
-   }
-});
+};
 
-// delete a user
+const logout_get = (req, res) => {
+    res.cookie('jwt', '', {maxAge:1})
+    res.redirect('/')
 
-const deleteUser = asyncHandler( async(req, res) => {
-   try {
-    const {id} = req.params;
-    const user = await User.findByIdAndDelete(id);
-    if(!user){
-        res.status(404)
-        throw new Error(`cannot find user with the given id ${id}`)
-    }
-    res.status(200).json(user)
-   } catch (error) {
-    res.status(500);
-    throw new Error(err.message)
-   }
+}
 
-});
 
 
 
 module.exports = {
-    getUsers,
-    getUser,
-    createUser,
-    updateUser,
-    deleteUser
+    signup_get,
+    signup_post,
+    login_get,
+    login_post,
+    logout_get
 }
