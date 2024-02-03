@@ -2,7 +2,7 @@ const User = require('../model/userModel');
 const jwt = require('jsonwebtoken')
 
 const handleErrors = (err) => {
-    let errors = { email: '',  password: ''};
+    let errors = { email: '',  password: '', roles: ''};
     // Incorrect email 
     if(err.message === 'incorrect email'){
         errors.email = 'That email is not registered'
@@ -12,6 +12,10 @@ const handleErrors = (err) => {
         errors.password = 'That password is incorrect'
     }
 
+    // error for roles
+    if(err.message === 'incorrect roles'){
+        errors.roles = 'That roles is incorrect'
+    }
     //duplicate error code
     if(err.code === 11000) {
         errors.email = 'That email is already registered'
@@ -53,8 +57,8 @@ const signup_get =  async(req, res) => {
 
 const signup_post = async(req, res) => {
     try {
-        const {email, password} = req.body;
-        const user = await User.create({email, password});
+        const {email, password, roles} = req.body;
+        const user = await User.create({email, password, roles});
         const token = createToken(user._id);
         res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge*1000 })
         res.status(201).json({user: user._id })
