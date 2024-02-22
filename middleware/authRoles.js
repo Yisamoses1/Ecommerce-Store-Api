@@ -1,10 +1,8 @@
-const User = require("../model/userModel");
-
 const authRoles = (permission) => {
   return async (req, res, next) => {
-    const userRole = await User.roles;
+    const userRole = req.body.roles;
 
-    if (permission.includes((userRole = "Admin"))) {
+    if (permission.includes(userRole)) {
       next();
     } else
       res

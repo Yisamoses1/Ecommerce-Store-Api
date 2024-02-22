@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const productRoute = require("./routes/productRoute");
 const userRoute = require("./routes/userRoute");
 const errorMiddleware = require("./middleware/errorMiddleware");
-const cookieParser = require("cookie-parser");
 
 const app = express();
 //middlware for json
@@ -18,8 +17,7 @@ app.use("/user", userRoute);
 
 // middleware for error
 app.use(errorMiddleware);
-// middleware for cookie
-app.use(cookieParser);
+
 
 const MONGO_URL = process.env.MONGO_URL;
 

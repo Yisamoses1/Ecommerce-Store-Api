@@ -58,8 +58,9 @@ const signup_post = async (req, res) => {
     const { email, password, roles } = req.body;
     const user = await User.create({ email, password, roles });
     const token = createToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ user: user._id, token });
+    // cookie can only be used on the browser
+    //res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(201).json({ token });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
@@ -68,7 +69,7 @@ const signup_post = async (req, res) => {
 
 const login_get = async (req, res) => {
   try {
-    const user = await User.find({});
+    const user = await User.find({}); 
     res.status(201).json(user);
   } catch (err) {
     throw new Error(err.message);
@@ -80,23 +81,18 @@ const login_post = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.login(email, password);
     const token = createToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id, token });
+    // cookie can only be used on the browser
+   // res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(200).json({  token });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
 };
 
-const logout_get = (req, res) => {
-  res.cookie("jwt", "", { maxAge: 1 });
-  res.redirect("/");
-};
-
 module.exports = {
   signup_get,
   signup_post,
   login_get,
-  login_post,
-  logout_get,
+  login_post
 };
