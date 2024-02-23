@@ -4,6 +4,7 @@ const User = require("../model/userModel");
 const requireAuth = (req, res, next) => {
   const authorizationHeader = req.headers?.authorization;
   if (!authorizationHeader) {
+    
     res.status(401).send("Unauthorized");
   }
   try {
@@ -12,7 +13,7 @@ const requireAuth = (req, res, next) => {
     res.locals.User = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
+    res.status(401).send("Unauthorized");
   }
 };
 

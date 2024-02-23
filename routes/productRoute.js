@@ -21,12 +21,12 @@ router.get("/:id", requireAuth, getProduct);
 
 // create a product
 //router.post('/', authRoles, createProduct)
-router.post("/", requireAuth, authRoles("Admin"), createProduct);
+router.post("/", requireAuth, createProduct);
 
 // route to update product
-router.put("/:id", requireAuth, authRoles("Admin"), updateProduct);
+router.put("/:id", requireAuth, updateProduct);
 
 // route to delete product
-router.delete("/:id", requireAuth, authRoles("Admin"), deleteProduct);
+router.delete("/:id", requireAuth, deleteProduct);
 
 module.exports = router;
